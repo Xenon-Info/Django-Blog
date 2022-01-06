@@ -1,0 +1,72 @@
+{% extends 'main.html' %}
+{% block content %}
+
+
+<!-- Main Section -->
+<main class="projects">
+    <section class="hero-section text-center">
+        <div class="container container--narrow">
+            <div class="hero-section__box">
+                <h2>Search in <span>Posts</span></h2>
+            </div>
+
+            <div class="hero-section__search">
+                <form id='search_form' class="form" action="{% url 'posts' %}" method="get">
+                    <div class="form__field">
+                        <label for="formInput#search">Search In Posts </label>
+                        <input class="input input--text" id="formInput#search" type="text" name="search_query"
+                            placeholder="Search in Posts" value="{{search_query}}" />
+                    </div>
+
+                    <input class="btn btn--sub btn--lg" type="submit" value="Search" />
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- Search Result: DevList -->
+    <section class="projectsList">
+        <div class="container">
+            <div class="grid grid--three">
+                {% for post in posts %}
+                <div class="column">
+                    <div class="card project">
+                        <a href="{% url 'post' post.id %}" class="project">
+                            <img class="project__thumbnail" src="{{post.image_url}}" style="aspect-ratio: auto" alt="project thumbnail" />
+                            <div class="card__body">
+                                <h3 class="project__title">{{post.title}}</h3>
+                                {% if post.sub_title %}
+                                <p>{{post.sub_title}}</p>
+                                {% endif %}
+                                <p><a class="project__author" href="{% url 'user-profile' post.owner.id %}">By
+                                        {{post.owner.name}}</a>
+                                </p>
+                                <p class="project--rating">
+                                    <span style="font-weight: bold;">{{post.vote_ratio}}%</span> Positive
+                                    Feedback ({{post.vote_total}}) Vote{{post.vote_total|pluralize:"s"}}
+                                </p>
+                                <div class="project__tags">
+                                    {% for tag in post.tags.all %}
+                                    <span class="tag tag--pill tag--main">
+                                        <small>{{tag}}</small>
+                                    </span>
+                                    {% endfor %}
+
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </section>
+
+    {% include 'pagination.html' with queryset=posts custom_range=custom_range %}
+
+</main>
+
+
+
+
+{% endblock %}

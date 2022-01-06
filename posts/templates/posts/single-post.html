@@ -1,0 +1,101 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<!-- Main Section -->
+<main class="singleProject my-md">
+    <div class="container">
+        <div class="layout">
+            <div class="column column--1of3">
+                <h3 class="singleProject__subtitle">Tags</h3>
+                <div class="singleProject__toolStack">
+                    {% for tag in post.tags.all %}
+                    <span class="tag tag--pill tag--sub tag--lg">
+                        <small>{{tag}}</small>
+                    </span>
+                    {% endfor %}
+
+                </div>
+
+                {% if post.source_link %}
+                <a class="singleProject__liveLink" href="{{post.source_link}}" target="_blank"><i
+                        class="im im-external-link"></i>Source
+                    Code
+                </a>
+                {% endif %}
+
+                {% if post.demo_link %}
+                <a class="singleProject__liveLink" href="{{post.demo_link}}" target="_blank"><i
+                        class="im im-external-link"></i>Live Demo
+
+                </a>
+                {% endif %}
+
+            </div>
+            <div class="column column--2of3">
+                <img class="singleProject__preview" src="{{ post.image_url }}" alt="portfolio thumbnail" />
+                <a href="{% url 'user-profile' post.owner.id  %}"
+                    class="singleProject__developer">{{post.owner.name}}</a>
+                <h2 class="singleProject__title">{{post.title}}</h2>
+                {% if post.sub_title %}
+                <h3 class="singleProject__subtitle">{{post.sub_title}}</h3>
+                {% endif %}
+                <div class="singleProject__info">
+                    {{post.body}}
+                </div>
+                <div class="comments">
+                    <h3 class="singleProject__subtitle">Feedback</h3>
+                    <h5 class="project--rating">
+                        {{post.vote_ratio}}% Positive Feedback ({{post.vote_total}}
+                        Vote{{post.vote_total|pluralize:"s"}})
+                    </h5>
+
+                    {% if request.user.profile.id in post.reviewers %}
+                    <p>You have already submitted your review for this post</p>
+
+                    {% elif request.user.profile == post.owner %}
+                    <p>You cannot review your own work</p>
+
+                    {% elif request.user.is_authenticated %}
+                    <form class="form" action="{% url 'post' post.id %}" method="POST">
+                        {% csrf_token %}
+                        {% for field in form %}
+                        <div class="form__field">
+                            <label for="formInput#textarea">{{field.label}}</label>
+                            {{field}}
+                        </div>
+                        {% endfor %}
+                        <input class="btn btn--sub btn--lg" type="submit" value="Add Review" />
+                    </form>
+                    {% else %}
+                    <a href="{% url 'login' %}?next={{request.path}}">Please login to leave a review</a>
+                    {% endif %}
+
+                    <div class="commentList">
+                        {% for review in post.review_set.all %}
+                        {% if review.body %}
+                        <div class="comment">
+                            <a href="{% url 'user-profile' review.owner.id  %}">
+                                <img class="avatar avatar--md" src="{{review.owner.profile_image.url}}" alt="user" />
+                            </a>
+
+
+                            <div class="comment__details">
+                                <a href="{% url 'user-profile' review.owner.id  %}"
+                                    class="comment__author">{{review.owner.name}}</a>
+                                <p class="comment__info">{{review.body|linebreaksbr}}</p>
+                            </div>
+
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</main>
+
+{% endblock %}
