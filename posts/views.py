@@ -1,5 +1,5 @@
 from django.core import paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -30,7 +30,7 @@ def posts(request):
 
 
 def post(request, pk):
-    post_obj = Post.objects.get(id=pk)
+    post_obj = get_object_or_404(Post, id=pk)
     form = ReviewForm()
 
     if request.method == 'POST':
