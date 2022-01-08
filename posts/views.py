@@ -11,10 +11,12 @@ from .utils import search_posts, paginate_posts
 def posts(request):
     posts, search_query = search_posts(request)
     custom_range, posts = paginate_posts(request, posts, 6)
+
     try:
         profile_request = request.user.profile
-    except:
+    except AttributeError:
         profile_request = None
+
     if profile_request is None:
         context = {'posts': posts,
                    'search_query': search_query, 'custom_range': custom_range}
@@ -23,6 +25,7 @@ def posts(request):
         unread_count = message_requests.filter(is_read=False).count()
         context = {'posts': posts, 'search_query': search_query,
                    'custom_range': custom_range, 'unread_count': unread_count}
+
     return render(request, 'posts/posts.html', context)
 
 
@@ -44,7 +47,7 @@ def post(request, pk):
 
     try:
         profile_request = request.user.profile
-    except:
+    except AttributeError:
         profile_request = None
 
     if profile_request is None:
@@ -65,6 +68,7 @@ def create_post(request):
     if request.method == 'POST':
         newtags = request.POST.get('newtags').replace(',',  " ").split()
         form = PostForm(request.POST, request.FILES)
+
         if form.is_valid():
             post = form.save(commit=False)
             post.owner = profile
@@ -75,8 +79,10 @@ def create_post(request):
                 post.tags.add(tag)
             messages.success(request, 'New Post successfully submitted!')
             return redirect('account')
+
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
+
     context = {'form': form, 'unread_count': unread_count}
     return render(request, "posts/post_form.html", context)
 
@@ -98,6 +104,7 @@ def update_post(request, pk):
                 post.tags.add(tag)
             messages.success(request, 'Your Post was successfully updated!')
             return redirect('account')
+
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
 
@@ -109,11 +116,14 @@ def update_post(request, pk):
 def delete_post(request, pk):
     profile = request.user.profile
     post = profile.post_set.get(id=pk)
+
     if request.method == 'POST':
         post.delete()
         messages.success(request, 'Post Deleted!')
         return redirect('account')
+
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
+
     context = {'object': post, 'unread_count': unread_count}
     return render(request, 'delete_template.html', context)

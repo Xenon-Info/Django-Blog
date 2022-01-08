@@ -43,7 +43,7 @@ class Profile(models.Model):
     def image_url(self):
         try:
             url = self.profile_image.url
-        except:
+        except ValueError:
             url = ''
         return url
 

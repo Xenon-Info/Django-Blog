@@ -37,7 +37,7 @@ class Post(models.Model):
     def image_url(self):
         try:
             url = self.featured_image.url
-        except:
+        except ValueError:
             url = ''
         return url
 

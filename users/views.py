@@ -23,7 +23,7 @@ def login_user(request):
 
         try:
             user = User.objects.get(username=username)
-        except:
+        except User.DoesNotExist:
             messages.error(request, 'Username does not exist')
 
         user = authenticate(request, username=username, password=password)
@@ -70,12 +70,13 @@ def register_user(request):
 
 def profiles(request):
     profiles, search_query = search_profiles(request)
-
     custom_range, profiles = paginate_profiles(request, profiles, 3)
+
     try:
         profile_request = request.user.profile
-    except:
+    except AttributeError:
         profile_request = None
+
     if profile_request is None:
         context = {'profiles': profiles, 'search_query': search_query,
                    'custom_range': custom_range}
@@ -84,18 +85,20 @@ def profiles(request):
         unread_count = message_requests.filter(is_read=False).count()
         context = {'profiles': profiles, 'search_query': search_query,
                    'custom_range': custom_range, 'unread_count': unread_count}
+
     return render(request, 'users/profiles.html', context)
 
 
 def user_profile(request, pk):
     profile = Profile.objects.get(id=pk)
-
     top_skills = profile.skill_set.exclude(description__exact="")
     other_skills = profile.skill_set.filter(description="")
+
     try:
         profile_request = request.user.profile
-    except:
+    except AttributeError:
         profile_request = None
+
     if profile_request is None:
         context = {'profile': profile, 'top_skills': top_skills,
                    "other_skills": other_skills}
@@ -104,6 +107,7 @@ def user_profile(request, pk):
         unread_count = message_requests.filter(is_read=False).count()
         context = {'profile': profile, 'top_skills': top_skills,
                    "other_skills": other_skills, 'unread_count': unread_count}
+
     return render(request, 'users/user-profile.html', context)
 
 
@@ -123,8 +127,10 @@ def user_account(request):
 def edit_account(request):
     profile = request.user.profile
     form = ProfileForm(instance=profile)
+
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
+
     if request.method == 'POST':
         form = ProfileForm(request.POST, request.FILES, instance=profile)
         if form.is_valid():
@@ -140,8 +146,10 @@ def edit_account(request):
 def create_skill(request):
     profile = request.user.profile
     form = SkillForm()
+
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
+
     if request.method == 'POST':
         form = SkillForm(request.POST)
         if form.is_valid():
@@ -162,6 +170,7 @@ def update_skill(request, pk):
     form = SkillForm(instance=skill)
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
+
     if request.method == 'POST':
         form = SkillForm(request.POST, instance=skill)
         if form.is_valid():
@@ -179,6 +188,7 @@ def delete_skill(request, pk):
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
     skill = profile.skill_set.get(id=pk)
+
     if request.method == 'POST':
         skill.delete()
         messages.success(request, 'Skill was deleted successfully!')
@@ -203,6 +213,7 @@ def view_message(request, pk):
     message_requests = profile.messages.all()
     unread_count = message_requests.filter(is_read=False).count()
     message = profile.messages.get(id=pk)
+
     if not message.is_read:
         message.is_read = True
         message.save()
@@ -216,7 +227,7 @@ def create_message(request, pk):
 
     try:
         sender = request.user.profile
-    except:
+    except AttributeError:
         sender = None
 
     if request.method == 'POST':
@@ -235,8 +246,10 @@ def create_message(request, pk):
             return redirect('user-profile', pk=recipient.id)
 
     context = {'recipient': recipient, 'form': form}
+
     if sender:
         message_requests = sender.messages.all()
         unread_count = message_requests.filter(is_read=False).count()
         context = {'recipient': recipient, 'form': form, 'unread_count': unread_count}
+
     return render(request, 'users/message_form.html', context)
