@@ -1,6 +1,7 @@
-from django.core import paginator
+import django
+from django.core import exceptions
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import Http404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Post, Tag
@@ -30,7 +31,11 @@ def posts(request):
 
 
 def post(request, pk):
-    post_obj = get_object_or_404(Post, id=pk)
+    try:
+        post_obj = get_object_or_404(Post, id=pk)
+    except exceptions.ValidationError:
+        raise Http404
+
     form = ReviewForm()
 
     if request.method == 'POST':
@@ -127,3 +132,5 @@ def delete_post(request, pk):
 
     context = {'object': post, 'unread_count': unread_count}
     return render(request, 'delete_template.html', context)
+
+

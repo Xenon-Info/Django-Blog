@@ -1,11 +1,10 @@
-from django.dispatch.dispatcher import receiver
+from django.core import exceptions
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
-from django.urls import conf
-from django.db.models import Q
+from django.http import Http404
 from .models import Profile, Message
 from .forms import CustomUserCreationForm, ProfileForm, SkillForm, MessageForm
 from .utils import search_profiles, paginate_profiles
@@ -90,7 +89,11 @@ def profiles(request):
 
 
 def user_profile(request, pk):
-    profile = get_object_or_404(Profile, id=pk)
+    try:
+        profile = get_object_or_404(Profile, id=pk)
+    except exceptions.ValidationError:
+        raise Http404
+
     top_skills = profile.skill_set.exclude(description__exact="")
     other_skills = profile.skill_set.filter(description="")
 
