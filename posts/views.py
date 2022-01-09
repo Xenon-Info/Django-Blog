@@ -13,10 +13,9 @@ def posts(request):
     posts, search_query = search_posts(request)
     custom_range, posts = paginate_posts(request, posts, 6)
 
-    try:
+    profile_request = None
+    if hasattr(request.user, 'profile'):
         profile_request = request.user.profile
-    except AttributeError:
-        profile_request = None
 
     if profile_request is None:
         context = {'posts': posts,
@@ -50,10 +49,9 @@ def post(request, pk):
         messages.success(request, 'Your review was successfully submitted!')
         return redirect('post', pk=post_obj.id)
 
-    try:
+    profile_request = None
+    if hasattr(request.user, 'profile'):
         profile_request = request.user.profile
-    except AttributeError:
-        profile_request = None
 
     if profile_request is None:
         context = {'post': post_obj, 'form': form}

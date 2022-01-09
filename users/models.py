@@ -41,10 +41,9 @@ class Profile(models.Model):
 
     @property
     def image_url(self):
-        try:
+        url = ''
+        if hasattr(self.profile_image, 'url'):
             url = self.profile_image.url
-        except ValueError:
-            url = ''
         return url
 
 

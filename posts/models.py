@@ -35,11 +35,11 @@ class Post(models.Model):
 
     @property
     def image_url(self):
-        try:
+        url = ''
+        if hasattr(self.featured_image, 'url'):
             url = self.featured_image.url
-        except ValueError:
-            url = ''
         return url
+
 
     @property
     def reviewers(self):

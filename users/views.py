@@ -71,10 +71,9 @@ def profiles(request):
     profiles, search_query = search_profiles(request)
     custom_range, profiles = paginate_profiles(request, profiles, 3)
 
-    try:
+    profile_request = None
+    if hasattr(request.user, 'profile'):
         profile_request = request.user.profile
-    except AttributeError:
-        profile_request = None
 
     if profile_request is None:
         context = {'profiles': profiles, 'search_query': search_query,
@@ -97,10 +96,9 @@ def user_profile(request, pk):
     top_skills = profile.skill_set.exclude(description__exact="")
     other_skills = profile.skill_set.filter(description="")
 
-    try:
+    profile_request = None
+    if hasattr(request.user, 'profile'):
         profile_request = request.user.profile
-    except AttributeError:
-        profile_request = None
 
     if profile_request is None:
         context = {'profile': profile, 'top_skills': top_skills,
@@ -228,10 +226,9 @@ def create_message(request, pk):
     recipient = Profile.objects.get(id=pk)
     form = MessageForm()
 
-    try:
+    sender = None
+    if hasattr(request.user, 'profile'):
         sender = request.user.profile
-    except AttributeError:
-        sender = None
 
     if request.method == 'POST':
         form = MessageForm(request.POST)
